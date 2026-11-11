@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iPhone · Toto</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0b0b0d;font-family:-apple-system,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif;color:#fff;user-select:none}
+body{display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+#phone{position:relative;width:min(390px,100vw);height:min(844px,100vh);background:#000;overflow:hidden;border-radius:54px;box-shadow:0 0 0 12px #1c1c1f,0 0 0 14px #2a2a2d}
+@media(max-width:430px){#phone{border-radius:0;box-shadow:none;height:100vh}}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;background:#000;overflow:hidden}
+.screen.on{display:flex;animation:fade .28s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:122px;height:35px;background:#000;border-radius:20px;z-index:60}
+
+/* iOS Status bar (No WiFi) */
+.status{display:flex;justify-content:space-between;align-items:center;padding:15px 26px 0;font-size:15px;font-weight:600;height:54px;z-index:55;letter-spacing:-.2px}
+.status .right{display:flex;align-items:center;gap:6px}
+.status .right svg{display:block}
+.status .net{font-size:13px;font-weight:600;margin-left:2px;margin-right:2px;transform:scale(0.95)}
+.batt{position:relative;width:28px;height:13px;display:flex;align-items:center}
+.batt svg{position:absolute;inset:0;width:100%;height:100%}
+.batt .pct{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:700;color:#000;z-index:2}
+.batt .fill{position:absolute;left:2px;top:2px;height:9px;border-radius:2px;background:#fff;z-index:1}
+.light .status{color:#000}
+.light .batt .fill{background:#000}
+.light .batt .pct{color:#fff}
+.light .status path,.light .status rect{fill:#000}
+
+.bar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:140px;height:5px;border-radius:3px;background:#fff;opacity:.9;z-index:50;cursor:pointer}
+.light .bar{background:#000}
+
+/* Lock Screen - PANTONE 3272 C */
+#lock{background:#00A19B;color:#fff;cursor:pointer}
+#lock .fallback-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,#00A19B 0%,#007A75 100%);z-index:0}
+#lock .lock-inner{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;padding-top:50px}
+#lock .date{text-align:center;font-size:21px;font-weight:600;text-shadow:0 2px 12px rgba(0,0,0,.2);letter-spacing:.2px}
+#lock .time{text-align:center;font-size:86px;font-weight:700;line-height:1;letter-spacing:-3px;margin-top:0;text-shadow:0 4px 24px rgba(0,0,0,.2)}
+#lock .hint{position:absolute;bottom:24px;width:100%;text-align:center;font-size:12px;opacity:.7;z-index:2;font-weight:500}
+#lock .bottom-btns{position:absolute;bottom:52px;left:0;right:0;display:flex;justify-content:space-between;padding:0 42px;z-index:3}
+#lock .bbtn{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;cursor:pointer}
+#lock .bbtn svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:1.8}
+
+/* iOS Style Notifications */
+#lock .notifications-wrapper{margin-top: 160px; padding: 0 14px; display: flex; flex-direction: column; gap: 10px; z-index: 10;}
+#lock .notif{background:rgba(255,255,255,0.25); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border-radius:20px; padding:12px 14px; box-shadow:0 8px 24px rgba(0,0,0,.15); transition: transform 0.2s;}
+#lock .notif:active{transform:scale(0.97);}
+#lock .notif-top{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+#lock .notif-icon{width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center;}
+#lock .notif-icon.msg{background:#34C759;}
+#lock .notif-icon.x{background:#000;}
+#lock .notif-icon svg{width:12px; height:12px; fill:#fff;}
+#lock .notif-app{font-size:11px; text-transform:uppercase; color:rgba(255,255,255,0.85); letter-spacing:.5px; flex:1; font-weight:500;}
+#lock .notif-time{font-size:11px; color:rgba(255,255,255,0.75);}
+#lock .notif-body b{font-size:14px; font-weight:600;}
+#lock .notif-body p{font-size:14px; opacity:.95; margin-top:2px; line-height:1.3;}
+
+/* Passcode */
+#passcode{position:absolute;inset:0;z-index:80;background:rgba(0,0,0,.55);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);display:none;flex-direction:column;align-items:center;justify-content:center;padding:0 40px;cursor:default}
+#passcode.on{display:flex}
+#passcode .dots{display:flex;gap:22px;margin-bottom:34px}
+#passcode .dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;background:transparent}
+#passcode .dot.filled{background:#fff}
+#passcode .dots.error{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+#passcode .msg{font-size:14px;margin-bottom:24px;opacity:.85;min-height:18px}
+#passcode .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 26px;width:100%;max-width:300px}
+#passcode .key{width:74px;height:74px;margin:0 auto;border-radius:50%;background:rgba(255,255,255,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:32px;cursor:pointer;transition:background .12s}
+#passcode .key:active{background:rgba(255,255,255,.35)}
+#passcode .key small{font-size:10px;letter-spacing:2px;margin-top:-2px;opacity:.85;font-weight:600}
+#passcode .key.blank{background:transparent;cursor:default}
+#passcode .key.del{background:transparent}
+#passcode .cancel{position:absolute;top:70px;left:28px;font-size:16px;color:#fff;opacity:.9;cursor:pointer}
+
+/* Home & Widgets - PANTONE 3272 C */
+#home{background:#00A19B}
+.widgets{display:flex;flex-direction:column;gap:14px;padding:10px 14px 0}
+.widget-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Spotify Widget */
+.w-spotify{background:rgba(30,30,30,.85);backdrop-filter:blur(20px);border-radius:22px;padding:16px;display:flex;gap:16px;align-items:center;cursor:pointer}
+.sp-art{width:72px;height:72px;border-radius:10px;background:linear-gradient(135deg,#222,#000);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px rgba(0,0,0,.3);position:relative;overflow:hidden}
+.sp-art::before{content:"";position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,#fff7a1,#ffcc00,#b8860b);opacity:0.8;animation:spin 8s linear infinite}
+@keyframes spin{100%{transform:rotate(360deg)}}
+.sp-art svg{position:relative;z-index:2;width:40px;height:40px;fill:#000}
+.sp-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.sp-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-artist{font-size:13px;color:#a1a1a6;margin-top:2px}
+.sp-controls{display:flex;gap:18px;margin-top:12px;color:#fff;align-items:center}
+.sp-controls svg{width:20px;height:20px;fill:currentColor}
+.sp-controls .play{width:28px;height:28px}
+
+/* Small Widgets */
+.widget{background:rgba(255,255,255,.15);backdrop-filter:blur(20px);border-radius:20px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;min-height:130px;cursor:pointer}
+.w-stock .w-sym{font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px}
+.w-stock .w-name{font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-stock .w-price{font-size:24px;font-weight:600;margin-top:auto;letter-spacing:-.5px}
+.w-stock .w-change{font-size:13px;font-weight:700;color:#30d158;margin-top:2px}
+.w-weather .w-loc{font-size:13px;font-weight:600;opacity:.9}
+.w-weather .w-temp{font-size:34px;font-weight:300;margin-top:auto}
+.w-weather .w-cond{font-size:12px;opacity:.8;margin-top:2px}
+
+/* App Icons Alignment */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 0;padding:24px 14px;}
+.app{cursor:pointer;position:relative;text-align:center;width:72px;margin:0 auto;font-size:11px;font-weight:500;letter-spacing:.1px;color:#fff;}
+.ic{width:60px;height:60px;border-radius:14px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);position:relative;overflow:hidden}
+.ic svg{width:42px;height:42px;display:block}
+.dock{position:absolute;bottom:24px;left:14px;right:14px;height:92px;border-radius:32px;background:rgba(255,255,255,.18);backdrop-filter:blur(24px);display:flex;justify-content:space-around;align-items:center;padding:0 10px}
+
+/* Coming Soon */
+#comingsoon{background:#000;color:#fff}
+#comingsoon .body{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding-bottom:80px;color:#8e8e93}
+#comingsoon .body svg{width:64px;height:64px;margin-bottom:16px;fill:none;stroke:currentColor;stroke-width:1.5}
+#comingsoon .body h2{font-size:22px;color:#fff;margin-bottom:8px;font-weight:600}
+#comingsoon .body p{font-size:14px;text-align:center;line-height:1.4}
+
+/* Lists & Dark */
+.dark{background:#000;color:#fff}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:2px 16px 8px;min-height:44px;border-bottom:1px solid #2f3336}
+.hdr h1{font-size:17px;font-weight:600}.back{color:#0a84ff;cursor:pointer;font-size:17px;min-width:70px;display:flex;align-items:center;gap:2px}
+.back::before{content:"‹";font-size:26px;line-height:0;margin-top:-2px}
+.body{flex:1;overflow-y:auto;padding-bottom:40px}
+
+/* X */
+#x .body{padding-bottom:48px}
+.x-tabs{display:flex;justify-content:space-around;border-bottom:1px solid #2f3336;white-space:nowrap}
+.x-tabs span{font-size:12px;color:#71767b;padding:13px 7px 11px;position:relative}
+.x-tabs span.active{color:#fff;font-weight:700}.x-tabs span.active:after{content:"";position:absolute;bottom:0;left:20%;right:20%;height:3px;background:#1d9bf0;border-radius:3px}
+.x-post{padding:14px 16px 11px;border-bottom:1px solid #2f3336}
+.x-post-head{display:flex;gap:10px}.x-post .avx{width:42px;height:42px;border-radius:50%;background:#000;border:1px solid #292929;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.x-post-main{flex:1;min-width:0}
+.x-author{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:14px;line-height:1.3}
+.x-author strong{font-weight:700;color:#e7e9ea}.x-author .handle,.x-author .date{color:#71767b;font-size:13px}
+.x-post-text{font-size:14px;line-height:1.42;color:#e7e9ea;margin-top:4px;white-space:pre-line;overflow-wrap:anywhere}
+.x-actions{display:flex;justify-content:space-between;max-width:340px;margin:12px 0 0 52px;color:#71767b;font-size:12px}
+.x-actions span{display:flex;align-items:center;gap:4px}.x-actions .heart{color:#f91880}
+.x-actions svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8}.x-actions .heart svg{fill:#f91880;stroke:#f91880}
+
+/* Stocks */
+#stocks .body{padding-bottom:54px}
+.stock-seg{display:flex;gap:20px;padding:12px 18px 0;border-bottom:1px solid #2c2c2e;cursor:pointer}
+.stock-seg span{font-size:13px;color:#8e8e93;font-weight:600;padding:7px 0 10px;border-bottom:2px solid transparent}
+.stock-seg span.active{color:#fff;border-bottom-color:#0a84ff}
+.stock-summary{padding:20px 18px 13px}.stock-summary .eyebrow{font-size:12px;color:#8e8e93}.stock-summary .headline{font-size:29px;font-weight:650;letter-spacing:-.8px;margin-top:3px}
+.stock-row{display:flex;align-items:center;padding:13px 18px;min-height:70px;border-bottom:1px solid #222225}
+.stock-mark{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none;background:#2c2c2e}
+.stock-mark svg{width:26px;height:26px}
+.stock-l{flex:1;margin-left:12px;min-width:0}.stock-l .sym{font-size:15px;font-weight:600}.stock-l .nm{font-size:12px;color:#8e8e93;margin-top:3px}
+.stock-r{text-align:right}.stock-r .pct{font-size:14px;font-weight:650}.stock-r .price{font-size:12px;color:#8e8e93;margin-top:2px}
+.stock-news-list{padding:0 14px}
+.news-item{padding:14px 0;border-bottom:1px solid #2c2c2e;font-size:14px;line-height:1.4}
+.news-item:last-child{border:0}.news-item .src{color:#8e8e93;font-size:12px;margin-top:4px}
+
+/* Weather */
+#weather .body{padding:0 0 50px}
+.wx-hero{position:relative;overflow:hidden;border-radius:25px;padding:18px 19px 20px;margin:12px 14px;background:linear-gradient(155deg,#5ba8e8,#367ec4 48%,#244c86);min-height:214px;box-shadow:0 8px 24px rgba(0,0,0,.22)}
+.wx-hero-top{display:flex;justify-content:space-between;align-items:center}
+.wx-hero .wx-place{font-size:13px;font-weight:600;opacity:.9}.wx-hero .wx-current{font-size:12px;opacity:.8;margin-top:3px}
+.wx-hero-main{display:flex;align-items:center;justify-content:space-between;margin-top:13px}
+.wx-hero-main .wx-ic{width:94px;height:94px;display:flex;align-items:center;justify-content:center}.wx-hero-main .wx-ic svg{width:90px;height:90px}
+.wx-hero-temp{font-size:58px;font-weight:250;letter-spacing:-3px;line-height:1}.wx-hero-cond{font-size:16px;font-weight:550;margin-top:7px}.wx-hero-city{font-size:13px;opacity:.82;margin-top:3px}
+.wx-section-title{font-size:20px;font-weight:650;letter-spacing:-.4px;margin:23px 4px 10px}
+.wx-list{background:#1c1c1e;border-radius:18px;overflow:hidden;margin:0 14px}
+.wx-list-row{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:68px;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer}
+.wx-list-row:last-child{border-bottom:0}.wx-list-row.selected{background:#2c2c30}
+.wx-list-row .wx-ic{width:42px;height:42px;display:flex;align-items:center;justify-content:center;flex:none}.wx-list-row .wx-ic svg{width:40px;height:40px}
+.wx-list-row .wx-info{flex:1}.wx-list-row .city{font-size:15px;font-weight:600}.wx-list-row .cond{font-size:12px;color:#a1a1a6;margin-top:3px}
+.wx-list-row .wx-temp{font-size:22px;font-weight:300}
+
+/* F1 */
+#f1 .body{padding:10px 0}
+.f1-title{padding:0 16px;font-size:16px;font-weight:700;letter-spacing:1.5px;margin-bottom:12px;color:#e7e9ea;text-align:center}
+#f1 table{width:100%;border-collapse:collapse;font-size:14px}
+#f1 td,#f1 th{padding:16px 12px;text-align:left;border-bottom:1px solid #2c2c2e}
+#f1 th{font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:1px;padding-top:6px;padding-bottom:10px}
+#f1 td:nth-child(2){font-weight:650}
+#f1 td.num,#f1 th.num{text-align:right}
+
+/* Jets */
+#jets .body{padding:14px}
+.flight-section{font-size:12px;color:#8e8e93;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:16px 4px 8px}
+.flight-section:first-child{margin-top:0}
+.jet-card{background:#1c1c1e;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #2c2c2e;display:flex;flex-direction:column;gap:6px}
+.jet-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.jet-date{font-size:12px;color:#ff453a;font-weight:700;letter-spacing:.5px}
+.jet-status{font-size:11px;color:#30d158;font-weight:600}
+.jet-route{font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}
+.jet-route svg{width:14px;height:14px;fill:#8e8e93}
+.jet-details{font-size:13px;color:#a1a1a6}
+.jet-meta-past .jet-date{color:#8e8e93}
+.jet-meta-past .jet-status{color:#8e8e93}
+</style>
+</head>
+<body>
+<div id="phone"></div>
+
+<script>
+const DATA = {
+  owner: "Toto Wolff",
+  passcode: "0121",
+  lock: { time: "13:39", date: "Wednesday 11 November",
+          notif: { from: "Susie", text: "Jack’s karting final is at 3. Don’t forget the helmet this time." } },
+  x: { handle: "@alliwantiswcc", following: 23, posts: 0,
+       likedPosts: [
+         { name: "Mercedes-AMG PETRONAS F1 Team", handle: "@MercedesAMGF1", text: "The Constructors' Championship is coming back to Brackley and Brixworth. F1 World Champions for a NINTH time", date: "Nov 11", avatar: "mercedes", verified: true, replies: "4.2K", reposts: "18.6K", likes: "97.3K", views: "5.1M" },
+         { name: "paddockallsucks", handle: "@paddockallsucks", text: "read horner's new book.SUCKS.genuinely wish i could get those hours back.", date: "Nov 10", avatar: "initial", replies: "312", reposts: "1.8K", likes: "12.4K", views: "689K" },
+         { name: "wolff defender", handle: "@wolffdefender27", text: "I am genuinely starting to question the integrity, competence and possibly the entire moral foundation of whoever is responsible for the 2026 DILF rankings. Toto Wolff not making the top 100 is an institutional failure of unprecedented proportions.\n\nHave we all collectively forgotten that this man is 54 years old and looks like THAT?", date: "Nov 9", avatar: "initial", replies: "891", reposts: "4.7K", likes: "31.2K", views: "2.3M" },
+         { name: "lostmygpu", handle: "@lostmygpu_83", text: "why is my nvidia stock doing this to me.", date: "Nov 8", avatar: "initial", replies: "47", reposts: "203", likes: "1.9K", views: "88K" }
+       ]},
+  stocks: [
+    ["Mercedes-AMG PETRONAS F1 Team","Formula One · Team equity","PRIVATE","mercedes","+2.4%","$18.72"],
+    ["Aston Martin Lagonda","Luxury automotive · LSE: AML","LISTED","aston","-4.1%","£0.57"],
+    ["HWA AG","Motorsport engineering · FRA: H9W","FRA: H9W","hwa","-0.8%","€6.10"],
+    ["BBR Rallye Racing","Racing components","PRIVATE","bbr","+3.6%","€2.84"],
+    ["Marchfifteen","Technology & investment","PRIVATE","march","+0.2%","$41.20"],
+    ["Marchsixteen","Technology & investment","PRIVATE","march","-0.5%","$33.05"]
+  ],
+  stockNews: [
+    ["Mercedes weighs sale of minority F1 team stake at ~$6.4B valuation", "Sportico / PlanetF1"],
+    ["Aston Martin sells F1 naming rights for £50M amid wider loss warning", "RTE / Gulf Business"],
+    ["HWA AG launches rights issue to raise up to €6.7M", "Deutsche Börse / 4investors"],
+    ["Mercedes-linked investment firms Marchfifteen and Marchsixteen stay quiet on F1 valuation", "Market watch"]
+  ],
+  weather: [
+    { city: "Las Vegas", temp: "14°", cond: "Clear", icon: "sun", label: "My Location", place: "Nevada, United States" },
+    { city: "Mexico City", temp: "18°", cond: "Thunderstorms", icon: "storm", label: "Recently Viewed", place: "Mexico" },
+    { city: "São Paulo", temp: "24°", cond: "Rain", icon: "rain", label: "Recently Viewed", place: "Brazil" },
+    { city: "Qatar (Lusail)", temp: "29°", cond: "Sunny", icon: "sun", label: "Recently Viewed", place: "Qatar" },
+    { city: "Abu Dhabi", temp: "30°", cond: "Clear", icon: "sun", label: "Recently Viewed", place: "United Arab Emirates" }
+  ],
+  f1: { title: "2026 DRIVERS' STANDINGS", drivers: [
+    ["1","Kimi Antonelli","ITA","Mercedes","390"],
+    ["2","Max Verstappen","NED","Red Bull Racing","279"],
+    ["3","George Russell","GBR","Mercedes","262"],
+    ["4","Lewis Hamilton","GBR","Ferrari","261"],
+    ["5","Charles Leclerc","MON","Ferrari","249"],
+    ["6","Lando Norris","GBR","McLaren","246"],
+    ["7","Oscar Piastri","AUS","McLaren","152"],
+    ["8","Isack Hadjar","FRA","Red Bull Racing","122"],
+    ["9","Liam Lawson","NZL","Racing Bulls","89"],
+    ["10","Pierre Gasly","FRA","Alpine","42"]
+  ]},
+  jets: {
+    upcoming: [
+      ["NOV 19 - 21", "Las Vegas GP", "Brackley (EGBK) → Las Vegas (KLAS)", "Depart: Nov 18 · Tail N-0000"],
+      ["NOV 27 - 29", "Qatar GP", "Las Vegas (KLAS) → Lusail (OTHH)", "Depart: Nov 25 · Tail N-0000"],
+      ["DEC 04 - 06", "Abu Dhabi GP", "Lusail (OTHH) → Abu Dhabi (OMAA)", "Depart: Dec 02 · Tail N-0000"]
+    ],
+    past: [
+      ["NOV 06 - 08", "São Paulo GP", "Brackley (EGBK) → São Paulo (SBGR)", "Completed"],
+      ["OCT 30 - 01", "Mexico City GP", "Brackley (EGBK) → Mexico City (MMMX)", "Completed"],
+      ["OCT 23 - 25", "US GP", "Brackley (EGBK) → Austin (KAUS)", "Completed"]
+    ]
+  }
+};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+const status = () => `<div class="status"><span>${DATA.lock.time}</span><div class="right">
+  <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="1" y="8" width="3" height="4" rx="0.8"/><rect x="5.5" y="5.5" width="3" height="6.5" rx="0.8"/><rect x="10" y="3" width="3" height="9" rx="0.8"/><rect x="14.5" y="0" width="3" height="12" rx="0.8"/></svg>
+  <span class="net">5G</span>
+  <div class="batt">
+    <svg width="28" height="13" viewBox="0 0 28 13"><rect x="1" y="1" width="23" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/><path d="M26 4.5v4a2 2 0 0 0 0-4z" fill="currentColor" opacity="0.4"/></svg>
+    <div class="fill" style="width:18px;"></div>
+    <span class="pct">83</span>
+  </div>
+</div></div>`;
+
+const bar = `<div class="bar" onclick="go('home')"></div>`;
+const hdr = (title, back) => `<div class="hdr"><span class="back" onclick="go('${back||"home"}')">Back</span><h1>${title}</h1><span style="min-width:70px"></span></div>`;
+
+const AVATARS = {
+  mercedes: `<svg viewBox="0 0 64 64"><rect width="64" height="64" fill="#000"/><circle cx="32" cy="32" r="26" fill="none" stroke="#fff" stroke-width="2"/><path d="M32 10v44M17 48l15-16 15 16" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`
+};
+const AV_COLORS = ["#6a4c93","#1982c4","#8ac926","#ff595e","#ff924c","#4267ac","#5e548e","#2a9d8f"];
+
+const ICONS = {
+  messages: `<svg viewBox="0 0 64 64"><path d="M32 6C16 6 4 16.5 4 29.5c0 7.4 4 14 10.3 18.3-.7 3.1-2.4 6.3-2.5 6.5-.3.5.1 1.2.7 1.1 4.4-.6 8.6-2.5 11.3-4.1 2.6.7 5.4 1.1 8.2 1.1 16 0 28-10.5 28-23.4S48 6 32 6z" fill="#fff"/></svg>`,
+  phone: `<svg viewBox="0 0 64 64"><path d="M20.5 8c1.7 0 3.2 1 3.9 2.6l3.4 7.3c.7 1.5.3 3.3-.9 4.4l-3.5 3.1c2.6 5.5 7.2 10.1 12.7 12.7l3.1-3.5c1.1-1.2 2.9-1.6 4.4-.9l7.3 3.4c1.6.7 2.6 2.2 2.6 3.9V47c0 4.4-3.6 8-8 8C27.9 55 9 36.1 9 16c0-4.4 3.6-8 8-8h3.5z" fill="#fff"/></svg>`,
+  spotify: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#1DB954"/><path d="M18 26c8-2 18-2 28 2M19 34c7-2 16-2 24 2M21 42c6-2 12-2 20 1" fill="none" stroke="#000" stroke-width="4" stroke-linecap="round"/></svg>`,
+  x: `<svg viewBox="0 0 64 64"><path d="M12 10h9.7l12.1 16.2L47.5 10H53L37.6 28.3 54 54h-9.7L30.9 35.9 15.9 54H10.4l16.8-19.4L12 10zm7.2 3.6 25.2 36.8h5.4L24.6 13.6h-5.4z" fill="#fff"/></svg>`,
+  stocks: `<svg viewBox="0 0 64 64"><path d="M10 45c7-8 12-10 18-7s9 1 14-7 8-12 13-15" fill="none" stroke="#24a148" stroke-width="4" stroke-linecap="round"/><path d="M10 51h44" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/></svg>`,
+  weather: `<svg viewBox="0 0 64 64"><circle cx="24" cy="23" r="12" fill="#ffd45a"/><path d="M24 5v5M24 36v5M6 23h5M37 23h5M11 10l4 4M33 32l4 4M11 36l4-4M33 14l4-4" stroke="#ffd45a" stroke-width="3" stroke-linecap="round"/><path d="M48 51H20a12 12 0 0 1 0-24c2 0 4 .5 5.8 1.4A14 14 0 0 1 52 37a9 9 0 0 1-4 14z" fill="#fff" stroke="#dcecff" stroke-width="1.5"/></svg>`,
+  f1: `<svg viewBox="0 0 64 64"><path d="M10 40l6-10h34l-4 10H10z" fill="#e10600"/><path d="M8 44h40l-2 6H14l-6-6z" fill="#e10600"/><path d="M24 30h22l-2 5H26l-2-5z" fill="#e10600"/></svg>`,
+  jets: `<svg viewBox="0 0 64 64"><path d="M32 4c2 0 3.5 2.2 3.5 5v12l18 10v6l-18-5v10l7 5v4l-10.5-3L21.5 51v-4l7-5V32l-18 5v-6l18-10V9c0-2.8 1.5-5 3.5-5z" fill="#fff"/></svg>`
+};
+const APPCOLORS = {
+  messages:"linear-gradient(180deg,#5ef77e,#28c940)", phone:"linear-gradient(180deg,#5ef77e,#28c940)",
+  spotify:"#1DB954",
+  x:"#000", stocks:"#f5f5f7", weather:"linear-gradient(180deg,#66c8ff,#0878d1)",
+  f1:"#fff", jets:"linear-gradient(180deg,#4b6cb7,#1a2a44)"
+};
+const APPS = [["messages","Messages"],["phone","Phone"],["jets","Jets"],["spotify","Spotify"],["x","X"],["stocks","Stocks"],["weather","Weather"],["f1","F1"]];
+
+const appIcon = a => {
+  let action = (a[0] === 'messages' || a[0] === 'phone' || a[0] === 'spotify') ? `goComingSoon('${a[0]}')` : `go('${a[0]}')`;
+  return `<div class="app" onclick="${action}"><div class="ic" style="background:${APPCOLORS[a[0]]}">${ICONS[a[0]]}</div>${a[1]}</div>`;
+};
+
+const STOCK_MARKS = {
+  mercedes: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#00A19B"/><path d="M32 10l9 38h-5l-4-20-4 20h-5z" fill="#fff"/></svg>`,
+  aston: `<svg viewBox="0 0 64 64"><path d="M32 18C22 18 14 26 8 34c8-4 16-5 24-5s16 1 24 5C50 26 42 18 32 18z" fill="#1FB095"/><path d="M20 36c8-2 16-2 24 0" stroke="#fff" stroke-width="2" fill="none"/></svg>`,
+  hwa: `<svg viewBox="0 0 64 64"><rect x="10" y="14" width="44" height="36" rx="6" fill="#e1e1e1"/><text x="32" y="38" font-size="18" font-weight="900" fill="#111" text-anchor="middle" font-family="Arial">HWA</text></svg>`,
+  bbr: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#c42b31"/><text x="32" y="38" font-size="15" font-weight="900" fill="#fff" text-anchor="middle" font-family="Arial">BBR</text></svg>`,
+  march: `<svg viewBox="0 0 64 64"><path d="M10 46V18l12 14 10-14 10 14 12-14v28" fill="none" stroke="#526d9c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+
+let currentStockTab = 'holdings';
+
+function build(){
+  const P = $("#phone");
+  P.innerHTML = `
+  <div class="island"></div>
+
+  <div class="screen on" id="lock" onclick="openPasscode(event)">
+    <div class="fallback-bg"></div>
+    <div class="lock-inner">${status()}<div class="date">${DATA.lock.date}</div><div class="time">${DATA.lock.time}</div>
+      <div class="notifications-wrapper">
+        <!-- Notification 1: Messages -->
+        <div class="notif">
+          <div class="notif-top">
+            <div class="notif-icon msg">
+              <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H6l-3 3V5a3 3 0 0 1 3-3h7a8 8 0 0 1 8 8z"/></svg>
+            </div>
+            <span class="notif-app">MESSAGES</span>
+            <span class="notif-time">now</span>
+          </div>
+          <div class="notif-body">
+            <b>${esc(DATA.lock.notif.from)}</b>
+            <p>${esc(DATA.lock.notif.text)}</p>
+          </div>
+        </div>
+        
+        <!-- Notification 2: X -->
+        <div class="notif">
+          <div class="notif-top">
+            <div class="notif-icon x">
+              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </div>
+            <span class="notif-app">X</span>
+            <span class="notif-time">1m ago</span>
+          </div>
+          <div class="notif-body">
+            <b>Mercedes-AMG PETRONAS F1 Team</b>
+            <p>We are the 2026 Constructors' Champions! 🏆</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-btns"><div class="bbtn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z" fill="none" stroke="#fff" stroke-width="1.8"/></svg></div><div class="bbtn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="3" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="13" r="4" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M8 6l1.2-2h5.6L16 6" fill="none" stroke="#fff" stroke-width="1.8"/></svg></div></div>
+    <div class="hint">Tap to unlock</div>
+  </div>
+
+  <div class="screen" id="home">${status()}
+    <div class="widgets">
+      <div class="w-spotify" onclick="goComingSoon('spotify')">
+        <div class="sp-art">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4h7.6l-6.2 4.6 2.4 7.4-6.2-4.6-6.2 4.6 2.4-7.4-6.2-4.6h7.6z"/></svg>
+        </div>
+        <div class="sp-info">
+          <div class="sp-title">We Are The Champions</div>
+          <div class="sp-artist">Queen</div>
+          <div class="sp-controls">
+            <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            <svg class="play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="widget-row">
+        <div class="widget w-stock" onclick="go('stocks')">
+          <div>
+            <div class="w-sym">Mercedes-AMG</div>
+            <div class="w-name">Formula One Team</div>
+          </div>
+          <div>
+            <div class="w-price">$18.72</div>
+            <div class="w-change">+2.4%</div>
+          </div>
+        </div>
+        <div class="widget w-weather" onclick="go('weather')">
+          <div class="w-loc">Las Vegas</div>
+          <div>
+            <div class="w-temp">14°</div>
+            <div class="w-cond">Clear</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grid">${APPS.filter(a=>!["messages","phone","jets","spotify"].includes(a[0])).map(appIcon).join("")}</div>
+    <div class="dock">${APPS.filter(a=>["messages","phone","jets","spotify"].includes(a[0])).map(appIcon).join("")}</div>${bar}</div>
+
+  <div class="screen dark" id="comingsoon">${status()}<div class="hdr"><span class="back" onclick="go('home')">Back</span><h1 id="cs-title">Coming Soon</h1><span style="min-width:70px"></span></div>
+    <div class="body">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <h2>Coming Soon</h2>
+      <p>We're working on something.<br>Please check back later.</p>
+    </div>${bar}
+  </div>
+
+  <div class="screen dark" id="x">${status()}${hdr(DATA.x.handle)}<div class="body">
+     <div class="x-tabs"><span>Posts</span><span>Replies</span><span>Highlights</span><span>Media</span><span class="active">Likes</span></div>
+     ${DATA.x.likedPosts.map((p,i)=>`<div class="x-post"><div class="x-post-head"><div class="avx">${p.avatar==="mercedes"?AVATARS.mercedes:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:${AV_COLORS[i%AV_COLORS.length]};font-weight:700;font-size:16px">${esc(p.name.replace(/[@_]/g,"").trim()[0]||"?")}</div>`}</div><div class="x-post-main"><div class="x-author"><strong>${esc(p.name)}</strong>${p.verified?`<span style="color:#1d9bf0;font-size:12px">●</span>`:""}<span class="handle">${esc(p.handle)}</span><span class="date">· ${esc(p.date)}</span></div><div class="x-post-text">${esc(p.text)}</div><div class="x-actions"><span><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H6l-3 3V5a3 3 0 0 1 3-3h7a8 8 0 0 1 8 8z"/></svg>${p.replies}</span><span><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>${p.reposts}</span><span class="heart"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>${p.likes}</span><span><svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>${p.views}</span></div></div></div></div>`).join("")}
+   </div>${bar}</div>
+
+  <div class="screen dark" id="stocks">${status()}${hdr("Stocks")}<div class="body">
+     <div class="stock-seg">
+        <span class="${currentStockTab==='markets'?'active':''}" onclick="switchStockTab('markets')">Markets</span>
+        <span class="${currentStockTab==='holdings'?'active':''}" onclick="switchStockTab('holdings')">Holdings</span>
+        <span class="${currentStockTab==='news'?'active':''}" onclick="switchStockTab('news')">News</span>
+     </div>
+     <div id="stock-content"></div>
+   </div>${bar}</div>
+
+  <div class="screen dark" id="weather">${status()}${hdr("Weather")}<div class="body">
+     <div id="wx-hero"></div><div class="wx-section-title" style="padding:0 18px">Recently Viewed</div><div class="wx-list" id="wx-list"></div>
+   </div>${bar}</div>
+
+  <div class="screen dark" id="f1">${status()}${hdr("Formula 1")}<div class="body">
+    <div class="f1-title">${DATA.f1.title}</div>
+    <table><tr><th>Pos</th><th>Driver</th><th>Nat</th><th>Team</th><th class="num">Pts</th></tr>
+    ${DATA.f1.drivers.map(d=>`<tr><td>${d[0]}</td><td>${esc(d[1])}</td><td>${esc(d[2])}</td><td>${esc(d[3])}</td><td class="num">${d[4]}</td></tr>`).join("")}</table>
+  </div>${bar}</div>
+
+  <div class="screen dark" id="jets">${status()}${hdr("Flight Plan")}<div class="body">
+     <div class="flight-section">Upcoming Flights</div>
+     ${DATA.jets.upcoming.map(j=>`<div class="jet-card">
+        <div class="jet-meta">
+          <span class="jet-date">${esc(j[0])}</span>
+          <span class="jet-status">Scheduled</span>
+        </div>
+        <div class="jet-route">${esc(j[1])}</div>
+        <div class="jet-details">${esc(j[2])}</div>
+        <div class="jet-details" style="font-size:11px;color:#71767b">${esc(j[3])}</div>
+     </div>`).join("")}
+     
+     <div class="flight-section">Completed Flights</div>
+     ${DATA.jets.past.map(j=>`<div class="jet-card" style="opacity:0.6">
+        <div class="jet-meta jet-meta-past">
+          <span class="jet-date">${esc(j[0])}</span>
+          <span class="jet-status">Completed</span>
+        </div>
+        <div class="jet-route">${esc(j[1])}</div>
+        <div class="jet-details">${esc(j[2])}</div>
+        <div class="jet-details" style="font-size:11px;color:#71767b">${esc(j[3])}</div>
+     </div>`).join("")}
+   </div>${bar}</div>
+
+  <div id="passcode"><div class="cancel" onclick="closePasscode()">Cancel</div><div class="dots" id="dots"></div><div class="msg" id="pmsg"></div><div class="pad" id="pad"></div></div>`;
+  
+  buildPad(); 
+  renderWeather();
+  renderStocks();
+}
+
+function switchStockTab(tab) {
+  currentStockTab = tab;
+  document.querySelectorAll('.stock-seg span').forEach((el, i) => {
+    el.classList.toggle('active', (tab === 'markets' && i===0) || (tab === 'holdings' && i===1) || (tab === 'news' && i===2));
+  });
+  renderStocks();
+}
+
+function renderStocks() {
+  const container = $("#stock-content");
+  if(currentStockTab === 'holdings') {
+    container.innerHTML = `
+      <div class="stock-summary"><div class="eyebrow">PORTFOLIO WATCHLIST</div><div class="headline">6 Companies</div></div>
+      ${DATA.stocks.map(s=>`<div class="stock-row"><div class="stock-mark">${STOCK_MARKS[s[3]]||""}</div><div class="stock-l"><div class="sym">${esc(s[0])}</div><div class="nm">${esc(s[1])}</div></div><div class="stock-r"><div class="pct ${s[4][0]==="-"?"red":"grn"}">${esc(s[4])}</div><div class="price">${esc(s[5])}</div></div></div>`).join("")}
+    `;
+  } else if(currentStockTab === 'news') {
+    container.innerHTML = `
+      <div class="stock-news-list">
+        ${DATA.stockNews.map(n=>`<div class="news-item">${esc(n[0])}<div class="src">${esc(n[1])}</div></div>`).join("")}
+      </div>
+    `;
+  } else {
+    container.innerHTML = `<div style="padding:20px;color:#8e8e93;text-align:center;">Market data unavailable.</div>`;
+  }
+}
+
+function wxIcon(type){
+  if(type=="sun") return `<svg viewBox="0 0 64 64"><circle cx="32" cy="29" r="14" fill="#ffd45a"/><g stroke="#ffd45a" stroke-width="3.5" stroke-linecap="round"><path d="M32 5v7M32 46v7M8 29h7M49 29h7M15 12l5 5M44 41l5 5M15 46l5-5M44 17l5-5"/></g><path d="M48 55H20a13 13 0 0 1 0-26c2 0 4 .5 5.8 1.4A15 15 0 0 1 54 42a10 10 0 0 1-6 13z" fill="#fff" stroke="#e8f3ff" stroke-width="1.5"/></svg>`;
+  if(type=="rain") return `<svg viewBox="0 0 64 64"><path d="M48 42H18a13 13 0 0 1 0-26c2 0 4 .5 5.8 1.4A15 15 0 0 1 54 29a10 10 0 0 1-6 13z" fill="#dce8f5"/><g stroke="#62c6ff" stroke-width="3.5" stroke-linecap="round"><path d="M21 48l-3 8M34 48l-3 8M47 48l-3 8"/></g></svg>`;
+  if(type=="storm") return `<svg viewBox="0 0 64 64"><path d="M48 40H18a13 13 0 0 1 0-26c2 0 4 .5 5.8 1.4A15 15 0 0 1 54 27a10 10 0 0 1-6 13z" fill="#aebdce"/><path d="M34 37l-9 15h9l-3 11 15-19H36l5-7z" fill="#ffd45a"/></svg>`;
+  return `<svg viewBox="0 0 64 64"><path d="M48 46H18a13 13 0 0 1 0-26c2 0 4 .5 5.8 1.4A15 15 0 0 1 54 33a10 10 0 0 1-6 13z" fill="#dce8f5"/></svg>`;
+}
+let weatherSelected=0;
+function renderWeather(){
+ const w=DATA.weather[weatherSelected];
+ $("#wx-hero").innerHTML=`<div class="wx-hero" style="margin:12px 14px"><div class="wx-hero-top"><div><div class="wx-place">${esc(w.label)}</div><div class="wx-current">${esc(w.place)}</div></div><div style="font-size:12px;opacity:.8">•••</div></div><div class="wx-hero-main"><div><div class="wx-hero-temp">${esc(w.temp)}</div><div class="wx-hero-cond">${esc(w.cond)}</div><div class="wx-hero-city">${esc(w.city)}</div></div><div class="wx-ic">${wxIcon(w.icon)}</div></div></div>`;
+ $("#wx-list").innerHTML=DATA.weather.slice(1).map((item,i)=>`<div class="wx-list-row ${weatherSelected===i+1?"selected":""}" onclick="selectWeather(${i+1})"><div class="wx-ic">${wxIcon(item.icon)}</div><div class="wx-info"><div class="city">${esc(item.city)}</div><div class="cond">${esc(item.cond)}</div></div><div class="wx-temp">${esc(item.temp)}</div></div>`).join("");
+}
+function selectWeather(index){weatherSelected=index;renderWeather();}
+
+let code="";
+function buildPad(){
+  const keys=["1","2","3","4","5","6","7","8","9","blank","0","del"];
+  $("#pad").innerHTML=keys.map(k=>{
+    if(k=="blank")return `<div class="key blank"></div>`;
+    if(k=="del")return `<div class="key del" onclick="press('del')"><svg viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M21 5H9L3 12l6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M12 9.5l5 5M17 9.5l-5 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div>`;
+    const sub={"2":"ABC","3":"DEF","4":"GHI","5":"JKL","6":"MNO","7":"PQRS","8":"TUV","9":"WXYZ"}[k]||"";
+    return `<div class="key" onclick="press('${k}')">${k}${sub?`<small>${sub}</small>`:""}</div>`;
+  }).join("");renderDots();
+}
+function renderDots(){const n=DATA.passcode.length;$("#dots").innerHTML=Array.from({length:n},(_,i)=>`<div class="dot ${i<code.length?"filled":""}"></div>`).join("");}
+function openPasscode(e){
+  if(e && e.target.closest('.bbtn')) return;
+  code="";$("#pmsg").textContent="Enter Passcode";$("#dots").classList.remove("error");renderDots();$("#passcode").classList.add("on");
+}
+function closePasscode(){$("#passcode").classList.remove("on");code="";renderDots();}
+function press(k){
+  if(k=="del"){code=code.slice(0,-1);renderDots();return;}
+  if(code.length>=DATA.passcode.length)return;
+  code+=k;renderDots();
+  if(code.length===DATA.passcode.length)setTimeout(checkCode,160);
+}
+function checkCode(){
+  if(code===DATA.passcode){$("#passcode").classList.remove("on");setTimeout(()=>go("home"),120);}
+  else{const d=$("#dots");d.classList.add("error");$("#pmsg").textContent="Wrong Passcode. Try Again.";setTimeout(()=>{d.classList.remove("error");code="";renderDots();$("#pmsg").textContent="Enter Passcode";},650);}
+}
+function go(id){document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id==id));}
+function goComingSoon(id){
+  const titles = { 'messages': 'Messages', 'phone': 'Phone', 'spotify': 'Spotify' };
+  $("#cs-title").textContent = titles[id] || 'Coming Soon';
+  go("comingsoon");
+}
+build();
+</script>
+</body>
+</html>
